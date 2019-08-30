@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <string.h>
+#include <sys/stat.h>
 //#include "tree.h"
 
 
@@ -40,6 +41,55 @@
     }
 
 }*/
+
+void checkStat(char path[]){
+
+    struct stat s;
+
+    if(stat(path, &s) == 0){
+        if(s.st_mode & S_IFDIR){
+            printf("%s is a directory \n", path);
+        }
+        else if(s.st_mode & S_IFREG){
+            printf("%s is a file \n", path);
+        }
+        else{
+            printf("We don't know wtf this is \n");
+        }
+    }
+}
+
+void loadDirectoryStack(char *path){
+    char buffer[100];
+    char buffStor[100] = "";
+    int pathLen = strlen(path);
+    char tempPath[100] = "";
+
+    if(path[pathLen-1] == '\n'){
+        path[pathLen-1] = 0;
+    }
+
+    FILE *loadPtr = fopen("stack.txt", "r");
+    while(fgets(buffer, sizeof(buffer), loadPtr)){
+        strcpy(tempPath, path);
+        strcat(tempPath, "/");
+        strcpy(buffStor, buffer);
+        int len = strlen(buffStor);
+        if( buffStor[len-1] == '\n') {
+            buffStor[len - 1] = 0;
+        }
+        strcat(tempPath, buffStor);
+        checkStat(tempPath);
+    }
+
+    fclose(loadPtr);
+
+}
+
+void makeLsFile(){
+    system("ls >> stack.txt");
+}
+
 void restoreStack(){
     char cloneBuffer[100];
     FILE *clonePtr = fopen("tempStack.txt", "r");     //opens the temporary file
@@ -124,6 +174,7 @@ int getPosInStack(char *str){ //returns -1 if doesn't exist in stack
 
 int main( int argc, const char* argv[] )
 {
+    remove("stack.txt");
     int i;
     char buffer[100];
     char path[100];
@@ -136,9 +187,12 @@ int main( int argc, const char* argv[] )
     while(fgets(buffer, sizeof(buffer), ptr)){  //seeks through file until end
         strcpy(path, buffer);                   //stores contents (current path) into cstring
     }
-    printf("%s", path);                         //prints path
-    fclose(ptr);
 
+    fclose(ptr);
+    remove("temp.txt");
+
+    makeLsFile();
+    loadDirectoryStack(path);
 
 
 }
