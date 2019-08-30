@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS =
-TARGET = dt.c
+TARGET = dt
 OBJS = main.o tree.o
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
