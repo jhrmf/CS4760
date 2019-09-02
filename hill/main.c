@@ -4,7 +4,7 @@
 #include <string.h>
 #include <sys/stat.h>
 //#include "tree.h"
-
+char finalPath[100] = "";
 
 /*void optFunc(){
     //dt [-h] [-I n] [-L -d -g -i -p -s -t -u | -l] [dirname]
@@ -41,17 +41,74 @@
     }
 
 }*/
+char * getPath(){
+    char buffer[100];
+    char path[100];
+    system("pwd >> temp.txt");
+    FILE *pathPtr = fopen("temp.txt", "r");
+    while(fgets(buffer, sizeof(buffer), pathPtr)){
+        strcpy(path, buffer);
+    }
+    fclose(pathPtr);
+    remove("temp.txt");
+    char *fpath = path;
+    return fpath;
+}
+
+char * trim(char path[]){
+    int i;
+    char file[100] = "";
+    char finalFile[100] = "";
+
+    for(i = 0; i < strlen(path); i++){
+        if(i+1 == strlen(path)){
+            int x = 0;
+            int y = 0;
+            int z = 0;
+            file[x] = path[i];
+            x++;
+            while(path[i] != '/'){
+                file[x] = path[i];
+                x++;
+                i--;
+            }
+            z = strlen(file) - 1;
+            for(y = 0; z != 0; z--){
+                finalFile[y] = file[z];
+                y++;
+            }
+            break;
+        }
+    }
+    char *name = finalFile;
+    return name;
+}
 
 void checkStat(char path[]){
 
     struct stat s;
-
     if(stat(path, &s) == 0){
-        if(s.st_mode & S_IFDIR){
+
+        if(s.st_mode & S_IFDIR) {
             printf("%s is a directory \n", path);
+            chdir(path);
+            system("ls");
+            char tempPath[100];
+            int len = strlen(tempPath);
+            strcpy(tempPath, getPath());
+            if( tempPath[len-1] == '\n') {
+                tempPath[len - 1] = 0;
+            }
+
         }
         else if(s.st_mode & S_IFREG){
-            printf("%s is a file \n", path);
+            FILE *filePtr = fopen(finalPath, "w");
+            char fileBuffer[100];
+            strcpy(fileBuffer, trim(path));
+            fputs(fileBuffer, filePtr);
+            fclose(filePtr);
+            printf("%s is a file\n", path);
+
         }
         else{
             printf("We don't know wtf this is \n");
@@ -100,6 +157,31 @@ void restoreStack(){
     fclose(clonePtr);
     remove("tempStack.txt");
     fclose(clonePtr2);
+}
+
+void insertInStack(int position, char *name ){
+    int i = 0;
+    char insertBuffer[100];
+    FILE *insertPtr = fopen("stack.txt", "r");
+    FILE *insertPtr2 = fopen("tempStack.txt", "w");
+    while(fgets(insertBuffer, sizeof(insertBuffer), insertPtr)){  //seeks through file until end
+        if(position == i){
+            char insertBuffer2[100];
+            FILE *insertPtr3 = fopen(name, "r");
+            while(fgets(insertBuffer2, sizeof(insertBuffer2), insertPtr3)){
+                fputs("   ", insertPtr2);
+                fputs(insertBuffer2, insertPtr2);
+            }
+            fclose(insertPtr3);
+            remove(name);
+        }
+        fputs(insertBuffer, insertPtr2);
+        i++;
+    }
+    fclose(insertPtr);
+    remove("stack.txt");
+    fclose(insertPtr2);
+    restoreStack();
 }
 
 void stackPop(){
@@ -174,6 +256,14 @@ int getPosInStack(char *str){ //returns -1 if doesn't exist in stack
 
 int main( int argc, const char* argv[] )
 {
+    char *pwd = getPath();
+    int pwdLen = strlen(pwd);
+    if(pwd[pwdLen-1] == '\n'){
+        pwd[pwdLen-1] = 0;
+    }
+    strcat(pwd, "/finalStack.txt");
+    strcpy(finalPath, pwd);
+    printf("%s \n", finalPath);
     remove("stack.txt");
     int i;
     char buffer[100];
@@ -181,18 +271,10 @@ int main( int argc, const char* argv[] )
     for( i = 0; i < argc; i++) {
         printf("%s \n", argv[i]);   //lists commandline arguments
     }
-    system("pwd >> temp.txt");      //reads path into temporary file
-    FILE *ptr = fopen("temp.txt", "r");     //opens the temporary file
-
-    while(fgets(buffer, sizeof(buffer), ptr)){  //seeks through file until end
-        strcpy(path, buffer);                   //stores contents (current path) into cstring
-    }
-
-    fclose(ptr);
-    remove("temp.txt");
-
+    strcpy(path, getPath());
+    printf("%s", path);
     makeLsFile();
     loadDirectoryStack(path);
-
+    remove("finalPath.txt");
 
 }
