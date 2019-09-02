@@ -1,0 +1,10 @@
+dt
+finalStack.txt
+main.c
+main.o
+makefile
+stack.txt
+testdir
+tree.c
+tree.h
+tree.o
