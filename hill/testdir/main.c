@@ -27,7 +27,7 @@ char * getPath(){
 void makeLsFile(){
     char commandTemp[100] = "";
     sprintf(commandTemp, "%d", level);
-    char command[100] = "ls -r >> ";
+    char command[100] = "ls >> ";
     strcat(command, commandTemp);
     system(command);
     char levelName[100];
@@ -62,8 +62,7 @@ char * getFile(char levelName[]){
             strcpy(holdFile, popBuffer);
 
         }
-        else{
-
+        else if(strcmp(popBuffer, levelName) != 0) {
             fputs(popBuffer, popPtr2);
         }
         i++;
@@ -97,57 +96,47 @@ void checkStat(char file[]){
     }
     strcat(currentPath, "/");
     strcat(currentPath, file);
-    printf("%s is current path \n", currentPath);
+    //printf("%s is current path \n", currentPath);
     struct stat s;
 
     if(stat(currentPath, &s) == 0){
-        char checkFile[100];
-        sprintf(checkFile, "%d", level);
+
+        int tempLevel = level;
+        while(tempLevel != 0){
+            printf("   ");
+            tempLevel--;
+        }
         if(s.st_mode & S_IFDIR) {
-            //display(file);
-            printf("%s is directory \n", file);
+            char levelName[100], newfile[100];
+            printf("%s\n", file);
             chdir(currentPath);
             level++;
-            makeLsFile();
-            char levelName[100];
             sprintf(levelName, "%d", level);
-            char newFile[100];
-            strcpy(newFile, getFile(levelName));
-            //printf("passing file %s\n ", newFile);
-            checkStat(newFile);
-            level--;
+            makeLsFile();
+            strcpy(newfile, getFile(levelName));
+            checkStat(newfile);
             chdir("..");
-            return;
+            level--;
         }
         else if(s.st_mode & S_IFREG){
-            printf("%s is file \n", file);
-            char levelName[100];
-            sprintf(levelName, "%d", level);
-            char newFile[100];
-            if(fileEmpty(levelName) != 0) {
-                strcpy(newFile, getFile(levelName));
-                checkStat(newFile);
-            }
-            else{
-                chdir("..");
-                level--;
-                sprintf(levelName, "%d", level);
-                if(level == 0 && fileEmpty(levelName) != 0){
-                    strcpy(newFile, getFile(levelName));
-                    checkStat(newFile);
-                }
-                else{
-                    return;
-                }
-
-            }
-
-
+            printf("%s\n", file);
         }
         else{
             printf("We don't know wtf this is \n");
         }
     }
+    char checkLevel[100];
+    sprintf(checkLevel, "%d", level);
+    if(fileEmpty(checkLevel) == 0){
+        remove(checkLevel);
+        return;
+    }
+    else{
+        char newFile[100];
+        strcpy(newFile, getFile(checkLevel));
+        checkStat(newFile);
+    }
+
 }
 
 
@@ -164,6 +153,8 @@ void control(){
     makeLsFile();
     strcpy(buffer, getFile(levelName));
     checkStat(buffer);
+    system("pwd");
+    remove("0");
 
 
 
