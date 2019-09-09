@@ -1,6 +1,7 @@
 Assignment 1
 CS4760 Fall Semester
 Joseph Hill
+Repository - https://github.com/jhrmf/CS4760
 
 Invocation of project:
 - dt [-h] [-I n] [-L -d -g -i -p -s -t -u | -l] [dirname]
@@ -31,3 +32,12 @@ needed, but I cannot find any reason or documentation on this being an issue for
 
 Any code that is not my own was taken from Linux Man pages, specfically a case function for stat(), and I do not believe
 anything else is not my own.
+
+I don't believe any code within results in a segmentation fault or incorrect invocation. The executable is named dt.
+The example you gave in the project did not have the correct invocation however, as -l was used and the results of 
+tpiugs was not listed correctly.
+
+perror was not utilized to the extent I would like, however, only because exit(EXIT_FAILURE) displayed the best error
+messages I could think of on program level, although perror is used along with it minimally.
+
+Thanks! 
